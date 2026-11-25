@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagrama de Caso de Uso UML & Regras de Negócio - Cadastro de Cliente</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    /* Ajustes visuais para campos editáveis acadêmicos */
+    .editable-field:empty::before {
+      content: attr(data-placeholder);
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    /* Transições e interatividade do Diagrama UML SVG */
+    .uml-node {
+      cursor: pointer;
+      transition: opacity 0.25s ease, transform 0.2s ease;
+    }
+    .uml-node:hover .usecase-ellipse {
+      stroke: #2563eb;
+      stroke-width: 2.5px;
+      fill: #eff6ff;
+    }
+    .uml-node.active .usecase-ellipse {
+      stroke: #1d4ed8;
+      stroke-width: 3px;
+      fill: #dbeafe;
+    }
+    .uml-actor:hover circle,
+    .uml-actor:hover line,
+    .uml-actor.active circle,
+    .uml-actor.active line {
+      stroke: #2563eb;
+      stroke-width: 2.8px;
+    }
+    .uml-actor:hover text,
+    .uml-actor.active text {
+      fill: #1d4ed8;
+    }
+    .uml-rel {
+      transition: opacity 0.25s ease;
+    }
+    .dimmed {
+      opacity: 0.14 !important;
+    }
+
+    /* Estilos específicos para impressão/exportação em PDF */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        padding: 0 !important;
+      }
+      header {
+        position: static !important;
+        box-shadow: none !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-shadow-none {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+      .print-break-inside {
+        break-inside: avoid;
+      }
+      .editable-field {
+        border-bottom: none !important;
+        background-color: transparent !important;
+        padding-left: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Cabeçalho Principal Acadêmico -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Engenharia de Software / Análise de Sistemas</span>
+            <span class="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">Especificação Normativa & UML</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">Regras de Negócio e Documentação UML — Sistema de Cadastro de Cliente</h1>
+          <p class="text-sm text-slate-500">Módulos de Registro, Validação Documental, Consulta, Atualização e Inativação de Clientes</p>
+        </div>
+
+        <!-- Botão de Ação -->
+        <div class="flex flex-wrap items-center gap-2.5 no-print shrink-0">
+          <button onclick="window.print()" class="px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition flex items-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Imprimir / Salvar PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Identificação Acadêmica (Editável Inline) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
+        <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200/80">
+          <span class="font-semibold text-slate-600 shrink-0">Aluno(a):</span>
+          <span contenteditable="true" data-placeholder="Clique para digitar seu nome..." class="editable-field flex-1 text-slate-900 font-medium focus:outline-none focus:bg-white focus:px-1.5 rounded"></span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200/80">
+          <span class="font-semibold text-slate-600 shrink-0">Disciplina / Turma:</span>
+          <span contenteditable="true" data-placeholder="Ex.: Análise e Projeto de Sistemas..." class="editable-field flex-1 text-slate-900 font-medium focus:outline-none focus:bg-white focus:px-1.5 rounded"></span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200/80">
+          <span class="font-semibold text-slate-600 shrink-0">Professor(a):</span>
+          <span contenteditable="true" data-placeholder="Clique para digitar o nome do docente..." class="editable-field flex-1 text-slate-900 font-medium focus:outline-none focus:bg-white focus:px-1.5 rounded"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Seção Superior: Diagrama de Caso de Uso UML Interativo (SVG) -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 print-shadow-none print-break-inside">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 mb-5 border-b border-slate-100">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 rounded">Diagrama UML 2.5</span>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900">Diagrama de Caso de Uso — Cadastro de Cliente</h2>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Clique em qualquer <strong>Ator</strong> ou <strong>Caso de Uso</strong> no desenho para inspecionar fluxos e regras vinculadas.</p>
+        </div>
+
+        <!-- Filtros de Relacionamentos -->
+        <div class="flex flex-wrap items-center gap-1.5 no-print" id="filter-controls">
+          <span class="text-xs font-semibold text-slate-500 mr-1">Destacar:</span>
+          <button type="button" data-filter="all" class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white transition cursor-pointer">
+            Todos
+          </button>
+          <button type="button" data-filter="association" class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer">
+            Associações
+          </button>
+          <button type="button" data-filter="include" class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer">
+            &lt;&lt;include&gt;&gt;
+          </button>
+          <button type="button" data-filter="extend" class="filter-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition cursor-pointer">
+            &lt;&lt;extend&gt;&gt;
+          </button>
+          <button type="button" id="reset-selection-btn" class="hidden px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition cursor-pointer">
+            Limpar Seleção
+          </button>
+        </div>
+      </div>
+
+      <!-- Grade: Canvas SVG do Diagrama + Painel Inspetor Lateral -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        
+        <!-- Área do Desenho SVG -->
+        <div class="xl:col-span-8 bg-slate-50/70 rounded-xl border border-slate-200/90 p-2 sm:p-4 overflow-x-auto">
+          <svg id="uml-svg" viewBox="0 0 980 650" class="w-full min-w-[720px] h-auto select-none" role="img" aria-label="Diagrama de Caso de Uso UML do Sistema de Cadastro de Cliente">
+            <defs>
+              <!-- Ponta de seta aberta para <<include>> e <<extend>> -->
+              <marker id="arrow-include" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+                <path d="M 1 2 L 10 6 L 1 10" fill="none" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+              <marker id="arrow-extend" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+                <path d="M 1 2 L 10 6 L 1 10" fill="none" stroke="#d97706" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+              <filter id="soft-shadow" x="-5%" y="-5%" width="110%" height="110%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0f172a" flood-opacity="0.06"/>
+              </filter>
+            </defs>
+
+            <!-- Retângulo de Limite do Sistema (System Boundary) -->
+            <rect x="195" y="20" width="585" height="610" rx="14" fill="#ffffff" stroke="#64748b" stroke-width="2" filter="url(#soft-shadow)"/>
+            <rect x="195" y="20" width="585" height="38" rx="14" fill="#f1f5f9"/>
+            <line x1="195" y1="58" x2="780" y2="58" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="487" y="44" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b" letter-spacing="0.3">
+              Sistema de Cadastro de Cliente
+            </text>
+
+            <!-- ================= CAMADA DE RELACIONAMENTOS ================= -->
+            <g id="layer-relations">
+              
+              <!-- Associações: Cliente (Esquerda Superior) -->
+              <line class="uml-rel rel-association" data-type="association" data-nodes="actor-cliente uc01" x1="112" y1="185" x2="255" y2="128" stroke="#475569" stroke-width="1.7"/>
+              <line class="uml-rel rel-association" data-type="association" data-nodes="actor-cliente uc05" x1="112" y1="205" x2="255" y2="345" stroke="#475569" stroke-width="1.7"/>
+              <line class="uml-rel rel-association" data-type="association" data-nodes="actor-cliente uc06" x1="112" y1="220" x2="255" y2="455" stroke="#475569" stroke-width="1.7"/>
+
+              <!-- Associações: Atendente / Admin (Esquerda Inferior) -->
+              <line class="uml-rel rel-association" data-type="association" data-nodes="actor-atendente uc01" x1="112" y1="425" x2="262" y2="148" stroke="#475569" stroke-width="1.7"/>
+              <line class="uml-rel rel-association" data-type="association" data-nodes="actor-atendente uc05" x1="112" y1="440" x2="255" y2="365" stroke="#475569" stroke-width="1.7"/>
+              <line class="uml-rel rel-association" data-type="association" data-nodes="actor-atendente uc06" x1="112" y1="455" x2="255" y2="465" stroke="#475569" stroke-width="1.7"/>
+              <line class="uml-rel rel-association" data-type="association" data-nodes="actor-atendente uc08" x1="112" y1="472" x2="255" y2="565" stroke="#475569" stroke-width="1.7"/>
+
+              <!-- Associações: API Externa (Direita) -->
+              <line class="uml-rel rel-association" data-type="association" data-nodes="uc02 actor-api" x1="735" y1="118" x2="868" y2="195" stroke="#475569" stroke-width="1.7"/>
+              <line class="uml-rel rel-association" data-type="association" data-nodes="uc03 actor-api" x1="735" y1="230" x2="868" y2="215" stroke="#475569" stroke-width="1.7"/>
+
+              <!-- Relacionamentos <<include>> (Verde Tracejado) -->
+              <!-- UC01 -> UC02 -->
+              <g class="uml-rel rel-include" data-type="include" data-nodes="uc01 uc02">
+                <line x1="435" y1="118" x2="545" y2="118" stroke="#059669" stroke-width="1.7" stroke-dasharray="6,4" marker-end="url(#arrow-include)"/>
+                <rect x="454" y="98" width="72" height="16" rx="4" fill="#ecfdf5"/>
+                <text x="490" y="109" text-anchor="middle" font-size="10.5" font-weight="600" fill="#047857">&lt;&lt;include&gt;&gt;</text>
+              </g>
+
+              <!-- UC01 -> UC03 -->
+              <g class="uml-rel rel-include" data-type="include" data-nodes="uc01 uc03">
+                <line x1="422" y1="142" x2="554" y2="215" stroke="#059669" stroke-width="1.7" stroke-dasharray="6,4" marker-end="url(#arrow-include)"/>
+                <rect x="454" y="168" width="72" height="16" rx="4" fill="#ecfdf5"/>
+                <text x="490" y="179" text-anchor="middle" font-size="10.5" font-weight="600" fill="#047857">&lt;&lt;include&gt;&gt;</text>
+              </g>
+
+              <!-- UC06 -> UC07 -->
+              <g class="uml-rel rel-include" data-type="include" data-nodes="uc06 uc07">
+                <line x1="435" y1="472" x2="548" y2="508" stroke="#059669" stroke-width="1.7" stroke-dasharray="6,4" marker-end="url(#arrow-include)"/>
+                <rect x="455" y="472" width="72" height="16" rx="4" fill="#ecfdf5"/>
+                <text x="491" y="483" text-anchor="middle" font-size="10.5" font-weight="600" fill="#047857">&lt;&lt;include&gt;&gt;</text>
+              </g>
+
+              <!-- UC08 -> UC07 -->
+              <g class="uml-rel rel-include" data-type="include" data-nodes="uc08 uc07">
+                <line x1="435" y1="560" x2="548" y2="530" stroke="#059669" stroke-width="1.7" stroke-dasharray="6,4" marker-end="url(#arrow-include)"/>
+                <rect x="456" y="546" width="72" height="16" rx="4" fill="#ecfdf5"/>
+                <text x="492" y="557" text-anchor="middle" font-size="10.5" font-weight="600" fill="#047857">&lt;&lt;include&gt;&gt;</text>
+              </g>
+
+              <!-- Relacionamento <<extend>> (Âmbar Tracejado): UC04 -> UC01 -->
+              <g class="uml-rel rel-extend" data-type="extend" data-nodes="uc04 uc01">
+                <line x1="345" y1="210" x2="345" y2="155" stroke="#d97706" stroke-width="1.7" stroke-dasharray="6,4" marker-end="url(#arrow-extend)"/>
+                <rect x="352" y="174" width="68" height="16" rx="4" fill="#fffbeb"/>
+                <text x="386" y="185" text-anchor="middle" font-size="10.5" font-weight="600" fill="#b45309">&lt;&lt;extend&gt;&gt;</text>
+              </g>
+            </g>
+
+            <!-- ================= CAMADA DE ATORES (BONECOS PALITO) ================= -->
+            <!-- Ator 1: Cliente -->
+            <g id="actor-cliente" class="uml-node uml-actor" data-id="actor-cliente">
+              <rect x="25" y="145" width="110" height="125" fill="transparent"/>
+              <circle cx="80" cy="165" r="14" fill="#ffffff" stroke="#1e293b" stroke-width="2.2"/>
+              <line x1="80" y1="179" x2="80" y2="215" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="58" y1="192" x2="102" y2="192" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="80" y1="215" x2="63" y2="242" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="80" y1="215" x2="97" y2="242" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <text x="80" y="260" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f172a">Cliente</text>
+            </g>
+
+            <!-- Ator 2: Atendente / Admin -->
+            <g id="actor-atendente" class="uml-node uml-actor" data-id="actor-atendente">
+              <rect x="18" y="395" width="124" height="135" fill="transparent"/>
+              <circle cx="80" cy="415" r="14" fill="#ffffff" stroke="#1e293b" stroke-width="2.2"/>
+              <line x1="80" y1="429" x2="80" y2="465" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="58" y1="442" x2="102" y2="442" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="80" y1="465" x2="63" y2="492" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="80" y1="465" x2="97" y2="492" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <text x="80" y="510" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Atendente /</text>
+              <text x="80" y="525" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Admin</text>
+            </g>
+
+            <!-- Ator 3: API Externa (CEP / Receita) -->
+            <g id="actor-api" class="uml-node uml-actor" data-id="actor-api">
+              <rect x="835" y="155" width="130" height="135" fill="transparent"/>
+              <circle cx="900" cy="175" r="14" fill="#ffffff" stroke="#1e293b" stroke-width="2.2"/>
+              <line x1="900" y1="189" x2="900" y2="225" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="878" y1="202" x2="922" y2="202" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="900" y1="225" x2="883" y2="252" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <line x1="900" y1="225" x2="917" y2="252" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+              <text x="900" y="270" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">API Externa</text>
+              <text x="900" y="285" text-anchor="middle" font-size="11" font-weight="500" fill="#475569">(CEP / Receita)</text>
+            </g>
+
+            <!-- ================= CAMADA DE CASOS DE USO (ELIPSES) ================= -->
+            <!-- UC01 -->
+            <g id="uc01" class="uml-node" data-id="uc01">
+              <ellipse class="usecase-ellipse" cx="345" cy="118" rx="92" ry="34" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="345" y="114" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC01 - Realizar</text>
+              <text x="345" y="129" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b">Cadastro de Cliente</text>
+            </g>
+
+            <!-- UC02 -->
+            <g id="uc02" class="uml-node" data-id="uc02">
+              <ellipse class="usecase-ellipse" cx="642" cy="118" rx="94" ry="34" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="642" y="114" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC02 - Validar</text>
+              <text x="642" y="129" text-anchor="middle" font-size="11" font-weight="600" fill="#1e293b">CPF/CNPJ e E-mail</text>
+            </g>
+
+            <!-- UC03 -->
+            <g id="uc03" class="uml-node" data-id="uc03">
+              <ellipse class="usecase-ellipse" cx="642" cy="230" rx="94" ry="34" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="642" y="226" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC03 - Consultar</text>
+              <text x="642" y="241" text-anchor="middle" font-size="11" font-weight="600" fill="#1e293b">Endereço por CEP</text>
+            </g>
+
+            <!-- UC04 -->
+            <g id="uc04" class="uml-node" data-id="uc04">
+              <ellipse class="usecase-ellipse" cx="345" cy="245" rx="95" ry="34" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="345" y="241" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC04 - Exibir Erro</text>
+              <text x="345" y="256" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1e293b">Validação / Duplicidade</text>
+            </g>
+
+            <!-- UC05 -->
+            <g id="uc05" class="uml-node" data-id="uc05">
+              <ellipse class="usecase-ellipse" cx="345" cy="355" rx="92" ry="32" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="345" y="351" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC05 - Consultar</text>
+              <text x="345" y="366" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b">Cliente</text>
+            </g>
+
+            <!-- UC06 -->
+            <g id="uc06" class="uml-node" data-id="uc06">
+              <ellipse class="usecase-ellipse" cx="345" cy="462" rx="92" ry="33" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="345" y="458" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC06 - Alterar</text>
+              <text x="345" y="473" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b">Dados Cadastrais</text>
+            </g>
+
+            <!-- UC07 -->
+            <g id="uc07" class="uml-node" data-id="uc07">
+              <ellipse class="usecase-ellipse" cx="642" cy="518" rx="92" ry="33" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="642" y="514" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC07 - Autenticar</text>
+              <text x="642" y="529" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b">Usuário</text>
+            </g>
+
+            <!-- UC08 -->
+            <g id="uc08" class="uml-node" data-id="uc08">
+              <ellipse class="usecase-ellipse" cx="345" cy="568" rx="92" ry="33" fill="#f8fafc" stroke="#334155" stroke-width="1.8"/>
+              <text x="345" y="564" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">UC08 - Inativar /</text>
+              <text x="345" y="579" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1e293b">Excluir Cliente</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Painel Lateral Interativo (Inspetor de Elementos) -->
+        <aside class="xl:col-span-4 bg-slate-50 rounded-xl border border-slate-200 p-5 flex flex-col justify-between min-h-[340px] print-shadow-none">
+          <div id="inspector-content">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="px-2.5 py-0.5 text-xs font-bold bg-blue-100 text-blue-800 rounded">Inspetor UML</span>
+              <span class="text-xs text-slate-400">Visão Geral</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-2">Selecione um elemento no diagrama</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              Clique sobre qualquer <strong>Ator</strong> (boneco palito) ou <strong>Caso de Uso</strong> (elipse) para visualizar suas pré-condições, fluxo principal, relacionamentos UML e as Regras de Negócio associadas.
+            </p>
+            <div class="p-3.5 rounded-lg bg-white border border-slate-200/80 space-y-2 text-xs">
+              <p class="font-semibold text-slate-800">Resumo Estrutural:</p>
+              <ul class="space-y-1 text-slate-600 list-disc list-inside">
+                <li><strong>3 Atores:</strong> Cliente, Atendente/Admin e API Externa</li>
+                <li><strong>8 Casos de Uso:</strong> UC01 a UC08</li>
+                <li><strong>4 Inclusões:</strong> &lt;&lt;include&gt;&gt; obrigatórias</li>
+                <li><strong>1 Extensão:</strong> &lt;&lt;extend&gt;&gt; de exceção</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="pt-4 mt-4 border-t border-slate-200/80 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Notação: UML 2.5</span>
+            <span class="font-medium text-slate-700">Escopo: Módulo Clientes</span>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- Seção Principal: Especificação das Regras de Negócio (RN01 a RN06) -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 print-shadow-none print-break-inside">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 mb-6 border-b border-slate-100">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900">Especificação das Regras de Negócio (RN01 a RN06)</h2>
+          <p class="text-sm text-slate-500 mt-0.5">Critérios normativos, restrições e validações obrigatórias que regem o ciclo de vida do cadastro de clientes.</p>
+        </div>
+        <span class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg self-start sm:self-auto">
+          6 Regras Documentadas
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        
+        <!-- RN01 -->
+        <article class="flex flex-col justify-between p-5 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-blue-300 hover:bg-white transition shadow-2xs print-break-inside">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-xs font-bold bg-blue-600 text-white rounded-md tracking-wide">RN01</span>
+              <span class="text-xs font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded">Integridade</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Unicidade de Documento (CPF/CNPJ)</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              Não é permitido cadastrar dois clientes distintos com o mesmo número de CPF (Pessoa Física) ou CNPJ (Pessoa Jurídica). O documento atua como chave única de identificação fiscal no sistema.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200/80 space-y-2 text-xs">
+            <div>
+              <span class="font-semibold text-slate-700">Impacto no Sistema:</span>
+              <p class="text-slate-500 mt-0.5">Bloqueia registros duplicados no banco de dados e aciona fluxo de exceção informando cadastro existente.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC01 - Realizar Cadastro</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC04 - Exibir Erro/Duplicidade</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- RN02 -->
+        <article class="flex flex-col justify-between p-5 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-emerald-300 hover:bg-white transition shadow-2xs print-break-inside">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-xs font-bold bg-emerald-600 text-white rounded-md tracking-wide">RN02</span>
+              <span class="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Validação</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Validação de Dados e Dígitos Verificadores</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              O sistema deve validar matematicamente os dígitos verificadores do CPF/CNPJ, a sintaxe do endereço de e-mail e consultar o CEP na base postal para preenchimento e validação do logradouro antes de salvar.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200/80 space-y-2 text-xs">
+            <div>
+              <span class="font-semibold text-slate-700">Impacto no Sistema:</span>
+              <p class="text-slate-500 mt-0.5">Evita inconsistências cadastrais, reduz erros de digitação e garante entregas/comunicações válidas.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC02 - Validar Dados</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC03 - Consultar CEP</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- RN03 -->
+        <article class="flex flex-col justify-between p-5 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-amber-300 hover:bg-white transition shadow-2xs print-break-inside">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-xs font-bold bg-amber-600 text-white rounded-md tracking-wide">RN03</span>
+              <span class="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Completude</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Obrigatoriedade de Campos Essenciais</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              Para efetivar a inclusão ou atualização cadastral, são obrigatórios: Nome Completo ou Razão Social, CPF/CNPJ, Data de Nascimento/Abertura, E-mail, Telefone de contato e Endereço completo (CEP, Logradouro, Número, Cidade e UF).
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200/80 space-y-2 text-xs">
+            <div>
+              <span class="font-semibold text-slate-700">Impacto no Sistema:</span>
+              <p class="text-slate-500 mt-0.5">Impede a submissão de formulários incompletos e destaca os campos pendentes ao usuário.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC01 - Realizar Cadastro</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC06 - Alterar Dados</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- RN04 -->
+        <article class="flex flex-col justify-between p-5 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-indigo-300 hover:bg-white transition shadow-2xs print-break-inside">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-xs font-bold bg-indigo-600 text-white rounded-md tracking-wide">RN04</span>
+              <span class="text-xs font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">Conformidade Legal</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Maioridade Civil para Autocadastro (PF)</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              Clientes Pessoa Física devem possuir idade igual ou superior a 18 anos completos na data do registro para realizar o autocadastro de forma autônoma e assumir obrigações comerciais.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200/80 space-y-2 text-xs">
+            <div>
+              <span class="font-semibold text-slate-700">Impacto no Sistema:</span>
+              <p class="text-slate-500 mt-0.5">Calcula a idade a partir da data de nascimento e bloqueia o autocadastro de menores de idade.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC01 - Realizar Cadastro</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC02 - Validar Dados</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC04 - Exibir Erro</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- RN05 -->
+        <article class="flex flex-col justify-between p-5 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-rose-300 hover:bg-white transition shadow-2xs print-break-inside">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-xs font-bold bg-rose-600 text-white rounded-md tracking-wide">RN05</span>
+              <span class="text-xs font-medium text-rose-700 bg-rose-50 px-2 py-0.5 rounded">Retenção de Dados</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Exclusão Lógica (Inativação de Registro)</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              Clientes que já possuem histórico de pedidos, notas fiscais ou movimentações financeiras não podem ser excluídos fisicamente do banco de dados, devendo apenas ter seu status alterado para "Inativo".
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200/80 space-y-2 text-xs">
+            <div>
+              <span class="font-semibold text-slate-700">Impacto no Sistema:</span>
+              <p class="text-slate-500 mt-0.5">Preserva a integridade referencial do histórico fiscal/contábil e impede novas compras pelo perfil inativo.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC05 - Consultar Cliente</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC08 - Inativar Cliente</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- RN06 -->
+        <article class="flex flex-col justify-between p-5 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-slate-400 hover:bg-white transition shadow-2xs print-break-inside">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-xs font-bold bg-slate-800 text-white rounded-md tracking-wide">RN06</span>
+              <span class="text-xs font-medium text-slate-700 bg-slate-200/70 px-2 py-0.5 rounded">Segurança & LGPD</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Autenticação para Consulta e Alteração</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">
+              Apenas usuários devidamente autenticados (o próprio titular da conta ou um atendente/administrador autorizado) podem visualizar dados sensíveis, alterar informações cadastrais ou inativar registros.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200/80 space-y-2 text-xs">
+            <div>
+              <span class="font-semibold text-slate-700">Impacto no Sistema:</span>
+              <p class="text-slate-500 mt-0.5">Exige login válido antes de liberar operações de leitura/escrita e registra log de auditoria das alterações.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC06 - Alterar Dados</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC07 - Autenticar Usuário</span>
+              <span class="px-2 py-0.5 bg-slate-200/70 text-slate-700 font-medium rounded">UC08 - Inativar Cliente</span>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Seção Complementar: Legenda de Relacionamentos UML & Tabela de Atores -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 print-break-inside">
+      
+      <!-- Legenda dos Relacionamentos UML -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 print-shadow-none">
+        <h3 class="text-base font-bold text-slate-900 mb-1">Legenda de Relacionamentos UML</h3>
+        <p class="text-xs text-slate-500 mb-4">Convenções utilizadas no Diagrama de Caso de Uso para o módulo de Cadastro de Cliente.</p>
+        
+        <div class="space-y-3 text-xs">
+          <div class="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <div class="mt-1.5 w-8 h-0.5 bg-slate-700 shrink-0"></div>
+            <div>
+              <span class="font-bold text-slate-800 block">Associação Direta (Linha Sólida)</span>
+              <span class="text-slate-600">Conecta um ator diretamente ao caso de uso que ele inicia ou participa (ex.: <em>Cliente</em> realiza <em>UC01 - Realizar Cadastro</em> ou <em>Atendente</em> executa <em>UC08 - Inativar Cliente</em>).</span>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 p-3 rounded-lg bg-emerald-50/50 border border-emerald-100">
+            <div class="mt-1.5 w-8 h-0.5 border-t-2 border-dashed border-emerald-600 shrink-0"></div>
+            <div>
+              <span class="font-bold text-emerald-900 block">&lt;&lt;include&gt;&gt; (Inclusão Obrigatória)</span>
+              <span class="text-slate-600">Indica comportamento obrigatório incorporado ao caso de uso base (ex.: <em>UC01</em> inclui <em>UC02 - Validar Dados</em> e <em>UC03 - Consultar CEP</em>; <em>UC06</em> e <em>UC08</em> incluem <em>UC07 - Autenticar Usuário</em>).</span>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 p-3 rounded-lg bg-amber-50/50 border border-amber-100">
+            <div class="mt-1.5 w-8 h-0.5 border-t-2 border-dashed border-amber-600 shrink-0"></div>
+            <div>
+              <span class="font-bold text-amber-900 block">&lt;&lt;extend&gt;&gt; (Extensão Condicional)</span>
+              <span class="text-slate-600">Representa um comportamento opcional ou fluxo de exceção acionado sob condição específica (ex.: <em>UC04 - Exibir Erro de Validação/Duplicidade</em> estende <em>UC01</em> quando o CPF já existe ou é inválido).</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de Atores e Responsabilidades -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 print-shadow-none">
+        <h3 class="text-base font-bold text-slate-900 mb-1">Atores e Responsabilidades</h3>
+        <p class="text-xs text-slate-500 mb-4">Perfis humanos e sistemas externos que interagem com o Cadastro de Cliente.</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 text-slate-500 uppercase">
+                <th class="py-2.5 pr-3 font-semibold">Ator</th>
+                <th class="py-2.5 px-3 font-semibold">Classificação</th>
+                <th class="py-2.5 pl-3 font-semibold">Casos de Uso & Atribuições</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+              <tr>
+                <td class="py-3 pr-3 font-bold text-slate-900">Cliente</td>
+                <td class="py-3 px-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-medium">Primário</span></td>
+                <td class="py-3 pl-3 text-slate-600">Realiza o próprio autocadastro (UC01), consulta seus dados (UC05) e atualiza suas informações mediante login (UC06).</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-3 font-bold text-slate-900">Atendente / Administrador</td>
+                <td class="py-3 px-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-medium">Primário</span></td>
+                <td class="py-3 pl-3 text-slate-600">Cadastra clientes presencialmente/suporte (UC01), pesquisa registros (UC05), edita dados (UC06) e inativa cadastros (UC08).</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-3 font-bold text-slate-900">API Externa (CEP / Receita)</td>
+                <td class="py-3 px-3"><span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded font-medium">Secundário</span></td>
+                <td class="py-3 pl-3 text-slate-600">Serviço externo acionado pelo sistema para validar situação cadastral de CPF/CNPJ (UC02) e preencher endereços via CEP (UC03).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-white border-t border-slate-200 py-5 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+      <p>Documentação de Análise de Sistemas — Regras de Negócio e UML (Cadastro de Cliente)</p>
+      <p>Documento formatado para validação docente e exportação em PDF</p>
+    </div>
+  </footer>
+
+  <!-- Script de Interatividade do Diagrama UML -->
+  <script>
+    (function () {
+      // Base de conhecimento dos elementos do diagrama
+      const umlCatalog = {
+        'actor-cliente': {
+          badge: 'Ator Primário',
+          badgeClass: 'bg-blue-100 text-blue-800',
+          title: 'Cliente',
+          description: 'Usuário final (Pessoa Física ou Jurídica) que interage com o portal ou aplicativo para criar sua conta, consultar seu perfil e manter seus dados atualizados.',
+          relations: [
+            'Inicia UC01 - Realizar Cadastro de Cliente (autocadastro)',
+            'Inicia UC05 - Consultar Cliente (próprio perfil)',
+            'Inicia UC06 - Alterar Dados Cadastrais'
+          ],
+          rules: ['RN01', 'RN02', 'RN03', 'RN04', 'RN06']
+        },
+        'actor-atendente': {
+          badge: 'Ator Primário',
+          badgeClass: 'bg-blue-100 text-blue-800',
+          title: 'Atendente / Administrador',
+          description: 'Colaborador interno com permissão operacional para cadastrar clientes presencialmente ou via suporte, pesquisar registros, corrigir informações e inativar cadastros.',
+          relations: [
+            'Inicia UC01 - Realizar Cadastro de Cliente',
+            'Inicia UC05 - Consultar Cliente',
+            'Inicia UC06 - Alterar Dados Cadastrais',
+            'Inicia UC08 - Inativar / Excluir Cliente'
+          ],
+          rules: ['RN01', 'RN02', 'RN03', 'RN05', 'RN06']
+        },
+        'actor-api': {
+          badge: 'Ator Secundário (Sistema Externo)',
+          badgeClass: 'bg-slate-200 text-slate-800',
+          title: 'API Externa (CEP / Receita)',
+          description: 'Serviços externos integrados (ex.: ViaCEP / Receita Federal) acionados automaticamente pelo sistema para validar documentos fiscais e preencher endereços.',
+          relations: [
+            'Participa de UC02 - Validar CPF/CNPJ e E-mail',
+            'Participa de UC03 - Consultar Endereço por CEP'
+          ],
+          rules: ['RN02']
+        },
+        'uc01': {
+          badge: 'Caso de Uso Base',
+          badgeClass: 'bg-indigo-100 text-indigo-800',
+          title: 'UC01 - Realizar Cadastro de Cliente',
+          description: 'Permite registrar um novo cliente (PF ou PJ) no banco de dados após preencher os campos obrigatórios e passar pelas validações automáticas.',
+          relations: [
+            '<<include>> UC02 - Validar CPF/CNPJ e E-mail',
+            '<<include>> UC03 - Consultar Endereço por CEP',
+            '<<extend>> acionado por UC04 em caso de erro ou duplicidade'
+          ],
+          rules: ['RN01', 'RN02', 'RN03', 'RN04']
+        },
+        'uc02': {
+          badge: 'Caso de Uso Incluído',
+          badgeClass: 'bg-emerald-100 text-emerald-800',
+          title: 'UC02 - Validar CPF/CNPJ e E-mail',
+          description: 'Verifica dígitos verificadores, unicidade do documento na base interna, maioridade civil (PF) e formato válido do e-mail antes de persistir o registro.',
+          relations: [
+            'Incluído obrigatoriamente por UC01',
+            'Comunica-se com API Externa (Receita)'
+          ],
+          rules: ['RN01', 'RN02', 'RN04']
+        },
+        'uc03': {
+          badge: 'Caso de Uso Incluído',
+          badgeClass: 'bg-emerald-100 text-emerald-800',
+          title: 'UC03 - Consultar Endereço por CEP',
+          description: 'Consulta o CEP informado na base postal externa para preencher automaticamente logradouro, bairro, cidade e UF, reduzindo falhas de digitação.',
+          relations: [
+            'Incluído obrigatoriamente por UC01',
+            'Comunica-se com API Externa (CEP)'
+          ],
+          rules: ['RN02', 'RN03']
+        },
+        'uc04': {
+          badge: 'Caso de Uso de Extensão',
+          badgeClass: 'bg-amber-100 text-amber-800',
+          title: 'UC04 - Exibir Erro de Validação / Duplicidade',
+          description: 'Fluxo alternativo/exceção acionado quando o CPF/CNPJ já está cadastrado, o documento é inválido, há campos obrigatórios vazios ou o cliente é menor de 18 anos.',
+          relations: [
+            '<<extend>> estende UC01 - Realizar Cadastro de Cliente'
+          ],
+          rules: ['RN01', 'RN02', 'RN03', 'RN04']
+        },
+        'uc05': {
+          badge: 'Caso de Uso de Leitura',
+          badgeClass: 'bg-indigo-100 text-indigo-800',
+          title: 'UC05 - Consultar Cliente',
+          description: 'Permite pesquisar e visualizar dados cadastrais e status (Ativo/Inativo) a partir do CPF/CNPJ, nome ou e-mail.',
+          relations: [
+            'Acionado por Cliente e Atendente / Admin'
+          ],
+          rules: ['RN05', 'RN06']
+        },
+        'uc06': {
+          badge: 'Caso de Uso de Atualização',
+          badgeClass: 'bg-indigo-100 text-indigo-800',
+          title: 'UC06 - Alterar Dados Cadastrais',
+          description: 'Permite atualizar telefone, e-mail, endereço e dados complementares de um cliente já registrado, exigindo autenticação prévia.',
+          relations: [
+            '<<include>> UC07 - Autenticar Usuário',
+            'Acionado por Cliente e Atendente / Admin'
+          ],
+          rules: ['RN02', 'RN03', 'RN06']
+        },
+        'uc07': {
+          badge: 'Caso de Uso de Segurança',
+          badgeClass: 'bg-emerald-100 text-emerald-800',
+          title: 'UC07 - Autenticar Usuário',
+          description: 'Valida credenciais (login/senha ou token) e nível de permissão do solicitante antes de liberar alterações cadastrais ou inativação.',
+          relations: [
+            'Incluído obrigatoriamente por UC06 e UC08'
+          ],
+          rules: ['RN06']
+        },
+        'uc08': {
+          badge: 'Caso de Uso Administrativo',
+          badgeClass: 'bg-indigo-100 text-indigo-800',
+          title: 'UC08 - Inativar / Excluir Cliente',
+          description: 'Realiza a exclusão lógica (alterando status para Inativo) caso o cliente possua histórico financeiro/pedidos, ou exclusão definitiva se não houver vínculos.',
+          relations: [
+            '<<include>> UC07 - Autenticar Usuário',
+            'Acionado exclusivamente por Atendente / Admin'
+          ],
+          rules: ['RN05', 'RN06']
+        }
+      };
+
+      const nodes = document.querySelectorAll('.uml-node');
+      const relations = document.querySelectorAll('.uml-rel');
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      const inspector = document.getElementById('inspector-content');
+      const resetBtn = document.getElementById('reset-selection-btn');
+      const defaultInspectorHTML = inspector.innerHTML;
+
+      let selectedNodeId = null;
+      let activeFilter = 'all';
+
+      function renderInspector(id) {
+        const item = umlCatalog[id];
+        if (!item) {
+          inspector.innerHTML = defaultInspectorHTML;
+          return;
+        }
+
+        const relationsList = item.relations
+          .map(rel => `<li class="text-slate-600">${rel.replace(/<</g, '&lt;&lt;').replace(/>>/g, '&gt;&gt;')}</li>`)
+          .join('');
+
+        const rulesBadges = item.rules
+          .map(rn => `<span class="px-2 py-0.5 bg-slate-200/80 text-slate-800 font-semibold rounded text-[11px]">${rn}</span>`)
+          .join('');
+
+        inspector.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <span class="px-2.5 py-0.5 text-xs font-bold rounded ${item.badgeClass}">${item.badge}</span>
+              <span class="text-[11px] font-mono text-slate-400 uppercase">${id}</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-2">${item.title}</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-4">${item.description}</p>
+            
+            <div class="space-y-3 text-xs">
+              <div class="p-3 rounded-lg bg-white border border-slate-200/80">
+                <span class="font-bold text-slate-800 block mb-1">Relacionamentos UML:</span>
+                <ul class="list-disc list-inside space-y-1">${relationsList}</ul>
+              </div>
+              <div>
+                <span class="font-bold text-slate-700 block mb-1.5">Regras de Negócio Aplicáveis:</span>
+                <div class="flex flex-wrap gap-1.5">${rulesBadges}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function applyVisualState() {
+        // Limpa estados anteriores
+        nodes.forEach(n => {
+          n.classList.remove('active', 'dimmed');
+        });
+        relations.forEach(r => {
+          r.classList.remove('dimmed');
+        });
+
+        // Se houver um nó selecionado, destaca apenas ele, suas linhas e vizinhos
+        if (selectedNodeId) {
+          resetBtn.classList.remove('hidden');
+          const connectedNodes = new Set([selectedNodeId]);
+
+          relations.forEach(rel => {
+            const linked = (rel.dataset.nodes || '').split(' ');
+            if (linked.includes(selectedNodeId)) {
+              linked.forEach(id => connectedNodes.add(id));
+            } else {
+              rel.classList.add('dimmed');
+            }
+          });
+
+          nodes.forEach(node => {
+            const id = node.dataset.id;
+            if (id === selectedNodeId) {
+              node.classList.add('active');
+            } else if (!connectedNodes.has(id)) {
+              node.classList.add('dimmed');
+            }
+          });
+          return;
+        }
+
+        resetBtn.classList.add('hidden');
+
+        // Caso contrário, aplica o filtro de tipo de relacionamento
+        if (activeFilter !== 'all') {
+          const activeNodes = new Set();
+          relations.forEach(rel => {
+            if (rel.dataset.type === activeFilter) {
+              (rel.dataset.nodes || '').split(' ').forEach(id => activeNodes.add(id));
+            } else {
+              rel.classList.add('dimmed');
+            }
+          });
+
+          nodes.forEach(node => {
+            if (!activeNodes.has(node.dataset.id)) {
+              node.classList.add('dimmed');
+            }
+          });
+        }
+      }
+
+      // Eventos de clique nos Atores e Casos de Uso
+      nodes.forEach(node => {
+        node.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = node.dataset.id;
+          selectedNodeId = (selectedNodeId === id) ? null : id;
+          renderInspector(selectedNodeId);
+          applyVisualState();
+        });
+      });
+
+      // Eventos nos botões de filtro
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedNodeId = null;
+          renderInspector(null);
+          activeFilter = btn.dataset.filter;
+
+          filterButtons.forEach(b => {
+            b.classList.remove('ring-2', 'ring-offset-1', 'ring-slate-400');
+          });
+          btn.classList.add('ring-2', 'ring-offset-1', 'ring-slate-400');
+
+          applyVisualState();
+        });
+      });
+
+      // Botão limpar seleção
+      resetBtn.addEventListener('click', () => {
+        selectedNodeId = null;
+        renderInspector(null);
+        applyVisualState();
+      });
+    })();
+  </script>
+
+</body>
+</html>
